@@ -17,4 +17,5 @@ docker exec scripts_rabbit2_1 bash -c "rabbitmqctl stop_app && rabbitmqctl join_
 
 docker exec scripts_rabbit3_1 bash -c "rabbitmqctl stop_app && rabbitmqctl join_cluster rabbit@rabbit1 && rabbitmqctl start_app "
 
+
 echo Cluster successfully created!
