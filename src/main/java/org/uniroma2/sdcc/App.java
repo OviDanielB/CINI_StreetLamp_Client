@@ -47,7 +47,9 @@ public class App
                     message = gson.toJson(streetLamp);
                     channel.basicPublish("", "storm", null, message.getBytes());
                     System.out.println(" [x] Sent '" + message + "'");
-                    Thread.sleep(1000);
+                    
+                    
+                    Thread.sleep(500);
                 }
 
             } catch (IOException e) {
