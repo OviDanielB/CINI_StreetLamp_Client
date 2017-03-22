@@ -19,6 +19,7 @@ public class App
 {
 
     private static String QUEUE_NAME = "storm";
+    private static float FAILURE_PROB = .3f;
 
     public static void main( String[] args )
     {
@@ -49,7 +50,7 @@ public class App
                     System.out.println(" [x] Sent '" + message + "'");
                     
                     
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 }
 
             } catch (IOException e) {
@@ -79,7 +80,7 @@ public class App
         streetLamp.setID(generateRandomInt());
         streetLamp.setLightIntensity(generateRandomFloat());
         streetLamp.setLampModel(Lamp.LED);
-        streetLamp.setOn(true);
+        streetLamp.setOn(randomMalfunctioning());
         streetLamp.setConsumption(generateRandomFloat());
         streetLamp.setLifetime(new Date(231211310));
         
@@ -89,6 +90,15 @@ public class App
         message.setTimestamp(new Timestamp(System.currentTimeMillis()));
 
         return message;
+    }
+
+    private static boolean randomMalfunctioning() {
+        float rand = (float) Math.random();
+        if(rand < FAILURE_PROB){
+            return false;
+        }
+
+        return true;
     }
 
     private static float generateRandomFloat() {
