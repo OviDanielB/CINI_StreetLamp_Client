@@ -8,7 +8,10 @@ import org.uniroma2.sdcc.Model.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -21,8 +24,25 @@ public class App
     private static String QUEUE_NAME = "storm";
     private static float FAILURE_PROB = .3f;
 
+    private static Float GAUSSIAN_MEAN = 60f;
+    private static Float GAUSSIAN_STDEV = 15f;
+
+    private static long counter = 0;
+
+    private static Random random;
+    private static float mean;
+
+    private static String arg;
+
+
     public static void main( String[] args )
     {
+
+        arg = args[0];
+
+        random = new Random(12345);
+        mean = 0;
+
 
         rabbitProducer();
     }
@@ -44,11 +64,16 @@ public class App
                 Gson gson = new Gson();
                 String message;
                 while(true) {
+
                     streetLamp = generateRandomStreetLight();
                     message = gson.toJson(streetLamp);
                     channel.basicPublish("", "storm", null, message.getBytes());
-                    System.out.println(" [x] Sent '" + message + "'");
-                    
+
+                    counter++;
+                    updateMean(streetLamp.getStreetLamp().getLightIntensity());
+                    System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
+                    //System.out.println(streetLamp.getNaturalLightLevel().getNaturalLightLevel());
+
                     
                     Thread.sleep(100);
                 }
@@ -68,17 +93,33 @@ public class App
 
     }
 
+    private static void updateMean(float lightIntensity) {
+
+        mean = mean + (lightIntensity - mean) / counter;
+    }
+
     private static StreetLampMessage generateRandomStreetLight() {
         Address address = new Address();
         address.setAddressType(AddressType.STREET);
-        address.setName("Politecnico");
+        address.setName(randomStreetName());
         address.setNumber(generateRandomInt());
         address.setNumberType(AddressNumberType.CIVIC);
 
         StreetLamp streetLamp = new StreetLamp();
         streetLamp.setAddress(address);
-        streetLamp.setID(generateRandomInt());
-        streetLamp.setLightIntensity(generateRandomFloat());
+
+
+
+        if(arg.equals("anomaly")){
+            streetLamp.setID(12345);
+            streetLamp.setLightIntensity(90f);
+
+        }else {
+            streetLamp.setID(generateRandomInt());
+            streetLamp.setLightIntensity(generateRandomFloatGaussian());
+        }
+
+
         streetLamp.setLampModel(Lamp.LED);
         streetLamp.setOn(randomMalfunctioning());
         streetLamp.setConsumption(generateRandomFloat());
@@ -90,6 +131,68 @@ public class App
         message.setTimestamp(new Timestamp(System.currentTimeMillis()));
 
         return message;
+    }
+
+    private static float mockFloatValues(String type) {
+
+        List<Float> values = new ArrayList<>();
+        switch (type){
+            case "normal":
+                values.add(59f);
+                values.add(60f);
+                values.add(61f);
+                values.add(64f);
+                values.add(54f);
+                values.add(69f);
+                values.add(60f);
+                values.add(60f);
+                values.add(70f);
+                values.add(71f);
+                values.add(62f);
+                values.add(65f);
+                break;
+            case "anomaly":
+                values.add(90f);
+                values.add(89f);
+                values.add(82f);
+        }
+
+        return values.get((int) (Math.random() * 100 % values.size()));
+
+    }
+
+    /**
+     * Normal(GAUSSIAN_MEAN,GAUSSIAN_STDEV)
+     * @return random float from Normal dist with
+     * mean GAUSSIAN_MEAN and stdev GAUSSIAN_STDEV
+     */
+    private static float generateRandomFloatGaussian() {
+
+
+
+        return (float) random.nextGaussian() * GAUSSIAN_STDEV + GAUSSIAN_MEAN;
+
+        /* 1299721 is prime
+        if(System.currentTimeMillis() % 1299721 == 0) {
+            System.out.println("[CINI] INTENSITY ANOMALY!!!");
+            return 100f;
+        } else {
+
+
+        }
+        */
+    }
+
+    private static String randomStreetName() {
+
+
+        float rand = (float) Math.random();
+
+        if(rand < 0.5){
+            return "POLITECNICO";
+        } else {
+            return "CAMBRIDGE";
+        }
     }
 
     private static boolean randomMalfunctioning() {
