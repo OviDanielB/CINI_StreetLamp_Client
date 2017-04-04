@@ -14,13 +14,13 @@ import java.sql.Timestamp;
 public class StreetLampMessage {
 
     private StreetLamp streetLamp;
-    private NaturalLightLevel naturalLightLevel;
-    private Timestamp timestamp;
+    private float naturalLightLevel;
+    private float timestamp;
 
     public StreetLampMessage() {
     }
 
-    public StreetLampMessage(StreetLamp streetLamp, NaturalLightLevel naturalLightLevel, Timestamp timestamp) {
+    public StreetLampMessage(StreetLamp streetLamp, float naturalLightLevel, float timestamp) {
         this.streetLamp = streetLamp;
         this.naturalLightLevel = naturalLightLevel;
         this.timestamp = timestamp;
@@ -34,19 +34,19 @@ public class StreetLampMessage {
         this.streetLamp = streetLamp;
     }
 
-    public NaturalLightLevel getNaturalLightLevel() {
+    public float getNaturalLightLevel() {
         return naturalLightLevel;
     }
 
-    public void setNaturalLightLevel(NaturalLightLevel naturalLightLevel) {
+    public void setNaturalLightLevel(float naturalLightLevel) {
         this.naturalLightLevel = naturalLightLevel;
     }
 
-    public Timestamp getTimestamp() {
+    public float getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(float timestamp) {
         this.timestamp = timestamp;
     }
 }

@@ -8,6 +8,7 @@ import org.uniroma2.sdcc.Model.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -123,12 +124,12 @@ public class App
         streetLamp.setLampModel(Lamp.LED);
         streetLamp.setOn(randomMalfunctioning());
         streetLamp.setConsumption(generateRandomFloat());
-        streetLamp.setLifetime(new Date(231211310));
+        streetLamp.setLifetime(LocalDateTime.now());
         
         StreetLampMessage message = new StreetLampMessage();
-        message.setNaturalLightLevel(new NaturalLightLevel(generateRandomFloat()));
+        message.setNaturalLightLevel(generateRandomFloat());
         message.setStreetLamp(streetLamp);
-        message.setTimestamp(new Timestamp(System.currentTimeMillis()));
+        message.setTimestamp(System.currentTimeMillis());
 
         return message;
     }
