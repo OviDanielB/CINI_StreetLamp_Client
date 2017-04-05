@@ -6,7 +6,7 @@ sleep 3
 
 docker exec scripts_rabbit1_1 rabbitmq-plugins enable rabbitmq_management
 
-#docker exec scripts_rabbit2_1 rabbitmq-plugins enable rabbitmq_management
+docker exec scripts_rabbit_final_1 rabbitmq-plugins enable rabbitmq_management
 
 #docker exec scripts_rabbit3_1 rabbitmq-plugins enable rabbitmq_management
 

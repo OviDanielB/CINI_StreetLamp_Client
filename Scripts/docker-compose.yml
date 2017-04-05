@@ -13,6 +13,15 @@ rabbit1:
     - "8883:8883"
     - "15672:15672"
 
+rabbit_final:
+  image: rabbitmq:3.6.6
+  hostname: rabbit2
+  ports:
+    - "1884:1883"
+    - "5673:5672"
+    - "8884:8883"
+    - "15673:15672"
+
 #rabbit2:
  # image: rabbitmq:3.6.6
   #hostname: rabbit2
