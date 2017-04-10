@@ -2,7 +2,7 @@
 
 docker-compose up -d
 
-sleep 3
+sleep 5
 
 docker exec scripts_rabbit1_1 rabbitmq-plugins enable rabbitmq_management
 
