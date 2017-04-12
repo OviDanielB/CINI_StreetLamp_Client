@@ -36,6 +36,11 @@ public class App
 
     private static String arg;
 
+    private  static final String  EXCHANGE_NAME = "dashboard_exchange";
+    /* topic based pub/sub */
+    private  static final String EXCHANGE_TYPE = "topic";
+    private  static final String ROUTING_KEY = "dashboard.anomalies";
+
 
     public static void main( String[] args )
     {
@@ -55,30 +60,72 @@ public class App
 
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost("localhost");
+
+            if(arg.equals("node")){
+                factory.setPort(5673);
+            }
+
+            String mockMess = "{\"anomalies\":{\"DAMAGED_BULB\":1.0,\"NOT_RESPONDING\":0.0},\"noResponseCount\":0," +
+                    "\"streetLamp\":{\"ID\":78569,\"on\":false,\"lampModel\":\"LED\",\"address\":{\"name\":\"POLITECNICO\",\"number\":26828,\"numberType\":\"CIVIC\"}," +
+                    "\"lightIntensity\":58.848267,\"consumption\":58.94588,\"lifetime\":{\"date\":{\"year\":2017,\"month\":1,\"day\":19},\"time\":{\"hour\":15,\"minute\":33,\"second\":13,\"nano\":598000000}}}," +
+                    "\"timestamp\":1491917600000,\"naturalLightLevel\":76.880745}";
+
+            String mockMess1 = "{\"anomalies\":{\"DAMAGED_BULB\":1.0,\"NOT_RESPONDING\":0.0},\"noResponseCount\":0," +
+                    "\"streetLamp\":{\"ID\":12345,\"on\":false,\"lampModel\":\"LED\",\"address\":{\"name\":\"POLITECNICO\",\"number\":26828,\"numberType\":\"CIVIC\"}," +
+                    "\"lightIntensity\":58.848267,\"consumption\":58.94588,\"lifetime\":{\"date\":{\"year\":2017,\"month\":1,\"day\":19},\"time\":{\"hour\":15,\"minute\":33,\"second\":13,\"nano\":598000000}}}," +
+                    "\"timestamp\":1491917600000,\"naturalLightLevel\":76.880745}";
+
+            String mockMess2 = "{\"anomalies\":{\"DAMAGED_BULB\":1.0,\"NOT_RESPONDING\":0.0},\"noResponseCount\":0," +
+                    "\"streetLamp\":{\"ID\":213,\"on\":false,\"lampModel\":\"LED\",\"address\":{\"name\":\"POLITECNICO\",\"number\":26828,\"numberType\":\"CIVIC\"}," +
+                    "\"lightIntensity\":60.23423,\"consumption\":45.94588,\"lifetime\":{\"date\":{\"year\":2017,\"month\":1,\"day\":19},\"time\":{\"hour\":15,\"minute\":33,\"second\":13,\"nano\":598000000}}}," +
+                    "\"timestamp\":1491917600000,\"naturalLightLevel\":76.880745}";
+
+            String[] mocks = {mockMess,mockMess1,mockMess2};
+
             Connection connection = null;
             try {
                 connection = factory.newConnection();
                 Channel channel = connection.createChannel();
 
-                channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+                if(arg.equals("node")){
 
-                StreetLampMessage streetLamp ;
-                Gson gson = new Gson();
-                String message;
-                while(true) {
+                    channel.exchangeDeclare(EXCHANGE_NAME,EXCHANGE_TYPE);
 
-                    streetLamp = generateRandomStreetLight();
-                    message = gson.toJson(streetLamp);
-                    channel.basicPublish("", "storm", null, message.getBytes());
+                    while (true) {
 
-                    counter++;
-                    updateMean(streetLamp.getStreetLamp().getLightIntensity());
-                    System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
-                    //System.out.println(streetLamp.getNaturalLightLevel().getNaturalLightLevel());
+                        Integer r = (int) (Math.random() * 100) % mocks.length;
+                        channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, mocks[r].getBytes());
+                        Thread.sleep(100);
+
+                    }
+
+
+                }else {
+
+                    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+                    StreetLampMessage streetLamp;
+                    Gson gson = new Gson();
+                    String message;
+                    while (true) {
+
+                        streetLamp = generateRandomStreetLight();
+                        message = gson.toJson(streetLamp);
+
+                        channel.basicPublish("", "storm", null, message.getBytes());
+
+
+                        counter++;
+                        updateMean(streetLamp.getStreetLamp().getLightIntensity());
+                        System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
+                        //System.out.println(streetLamp.getNaturalLightLevel().getNaturalLightLevel());
+                        Thread.sleep(100);
+                    }
+                }
 
                     
-                    Thread.sleep(100);
-                }
+
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -130,7 +177,7 @@ public class App
         StreetLampMessage message = new StreetLampMessage();
         message.setNaturalLightLevel(generateRandomFloat());
         message.setStreetLamp(streetLamp);
-        message.setTimestamp(System.currentTimeMillis());
+        message.setTimestamp(System.currentTimeMillis() - (float)(Math.random() * 1000000));
 
         return message;
     }
