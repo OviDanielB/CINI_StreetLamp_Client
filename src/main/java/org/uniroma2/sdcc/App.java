@@ -35,6 +35,7 @@ public class App
     private static float mean;
 
     private static String arg;
+    private static String arg1;
 
     private  static final String  EXCHANGE_NAME = "dashboard_exchange";
     /* topic based pub/sub */
@@ -46,6 +47,11 @@ public class App
     {
 
         arg = args[0];
+        if(args.length == 2) {
+            arg1 = args[1];
+        } else {
+            arg1 = "";
+        }
 
         random = new Random(12345);
         mean = 0;
@@ -82,6 +88,8 @@ public class App
 
             String[] mocks = {mockMess,mockMess1,mockMess2};
 
+
+
             Connection connection = null;
             try {
                 connection = factory.newConnection();
@@ -93,9 +101,53 @@ public class App
 
                     while (true) {
 
-                        Integer r = (int) (Math.random() * 100) % mocks.length;
-                        channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, mocks[r].getBytes());
-                        Thread.sleep(100);
+                        switch (arg1){
+                            case "dashboard.statistics.lamps":
+                                String statLamp = "{\"id\":50,\"street\":\"Via Maggio\",\"consumption\":0.0018343345," +
+                                        "\"timestamp\":{\"date\":{\"year\":2017,\"month\":4,\"day\":12}," +
+                                        "\"time\":{\"hour\":15,\"minute\":33,\"second\":0,\"nano\":0}},\"window length\":5}";
+                                channel.basicPublish(EXCHANGE_NAME, arg1, null, statLamp.getBytes());
+                                System.out.println(statLamp + "\r");
+                                break;
+
+                            case "dashboard.statistics.streets":
+                                String statStreet = "{\"street\":\"Piazza Risorgimento\",\"consumption\":0.16939843," +
+                                        "\"timestamp\":{\"date\":{\"year\":2017,\"month\":4,\"day\":12}," +
+                                        "\"time\":{\"hour\":15,\"minute\":33,\"second\":0,\"nano\":0}},\"window length\":5}";
+                                channel.basicPublish(EXCHANGE_NAME, arg1, null, statStreet.getBytes());
+                                System.out.println(statStreet + "\r");
+                                break;
+
+                            case "dashboard.statistics.global":
+                                String statGlobal = "{\"street\":\"*\",\"consumption\":0.07858789," +
+                                        "\"timestamp\":{\"date\":{\"year\":2017,\"month\":4,\"day\":12}," +
+                                        "\"time\":{\"hour\":16,\"minute\":10,\"second\":0,\"nano\":0}},\"window length\":14}";
+                                channel.basicPublish(EXCHANGE_NAME, arg1, null, statGlobal.getBytes());
+                                System.out.println(statGlobal + "\r");
+
+                                break;
+
+                            case "dashboard.rank":
+                                String rank = " {\"ranking\":[" +
+                                        "{\"id\":36331,\"address\":{\"name\":\"CAMBRIDGE\",\"number\":37794,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":15},\"time\":{\"hour\":17,\"minute\":8,\"second\":38,\"nano\":881000000}},\"timestamp\":1492095730000}," +
+                                        "{\"id\":24801,\"address\":{\"name\":\"POLITECNICO\",\"number\":54762,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":16},\"time\":{\"hour\":17,\"minute\":8,\"second\":36,\"nano\":287000000}},\"timestamp\":1492095860000}," +
+                                        "{\"id\":84057,\"address\":{\"name\":\"CAMBRIDGE\",\"number\":48838,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":17},\"time\":{\"hour\":17,\"minute\":8,\"second\":27,\"nano\":177000000}},\"timestamp\":1492095990000}," +
+                                        "{\"id\":22190,\"address\":{\"name\":\"POLITECNICO\",\"number\":80962,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":17},\"time\":{\"hour\":17,\"minute\":8,\"second\":28,\"nano\":310000000}},\"timestamp\":1492095990000}," +
+                                        "{\"id\":15180,\"address\":{\"name\":\"CAMBRIDGE\",\"number\":18736,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":18},\"time\":{\"hour\":17,\"minute\":8,\"second\":35,\"nano\":455000000}},\"timestamp\":1492095070000}," +
+                                        "{\"id\":87815,\"address\":{\"name\":\"CAMBRIDGE\",\"number\":78779,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":20},\"time\":{\"hour\":17,\"minute\":8,\"second\":25,\"nano\":304000000}},\"timestamp\":1492095600000}," +
+                                        "{\"id\":85020,\"address\":{\"name\":\"POLITECNICO\",\"number\":36266,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":20},\"time\":{\"hour\":17,\"minute\":8,\"second\":37,\"nano\":119000000}},\"timestamp\":1492095730000}," +
+                                        "{\"id\":80561,\"address\":{\"name\":\"POLITECNICO\",\"number\":53440,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":21},\"time\":{\"hour\":17,\"minute\":8,\"second\":17,\"nano\":922000000}},\"timestamp\":1492095990000}," +
+                                        "{\"id\":48373,\"address\":{\"name\":\"CAMBRIDGE\",\"number\":9804,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":21},\"time\":{\"hour\":17,\"minute\":8,\"second\":23,\"nano\":226000000}},\"timestamp\":1492096120000}," +
+                                        "{\"id\":26771,\"address\":{\"name\":\"POLITECNICO\",\"number\":22462,\"numberType\":\"CIVIC\"},\"lifetime\":{\"date\":{\"year\":2017,\"month\":2,\"day\":21},\"time\":{\"hour\":17,\"minute\":8,\"second\":24,\"nano\":687000000}},\"timestamp\":1492095600000}]," +
+                                        "\"count\":235}\n";
+                                channel.basicPublish(EXCHANGE_NAME, arg1, null, rank.getBytes());
+                                System.out.println(rank + "\r");
+                            default:
+                                Integer r = (int) (Math.random() * 100) % mocks.length;
+                                channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, mocks[r].getBytes());
+                        }
+
+                        Thread.sleep(1000);
 
                     }
 

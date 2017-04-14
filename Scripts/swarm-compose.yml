@@ -1,0 +1,112 @@
+# rabbit queue
+version: "3"
+services:
+  rabbit:
+    image: rabbitmq:alpine
+    hostname: rabbit1
+    command: rabbitmq-plugins enable rabbitmq_management
+    networks:
+      - cini
+    ports:
+      - "5672:5672"
+      - "1883:1883"
+      - "8883:8883"
+      - "15672:15672" #rabbit UI
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+
+  rabbit_dashboard:
+    image: rabbitmq:alpine
+    hostname: rabbit2
+    command: rabbitmq-plugins enable rabbitmq_management
+    networks:
+      - cini
+    ports:
+      - "5673:5672"
+      - "1884:1883"
+      - "8884:8883"
+      - "15673:15672" #rabbit UI
+    deploy:
+      placement:
+        constraints: [node.role == worker]
+
+  memc:
+    image: memcached:alpine
+    networks:
+      - cini
+    ports:
+      - "11211:11211"
+
+  zookeeper:
+    image: zookeeper:3.4
+    networks:
+      - cini
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  storm-nimbus:
+    image: storm:1.0.3
+    command: bash -c "storm nimbus"
+    networks:
+      - cini
+    depends_on:
+      - zookeeper
+#    links:
+#      - "zookeeper:zookeeper"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  supervisor:
+    image: storm:1.0.3
+    command: bash -c "storm supervisor"
+    networks:
+      - cini
+    depends_on:
+      - zookeeper
+      - storm-nimbus
+      - rabbit
+      - rabbit_dashboard
+#    links:
+#      - "zookeeper:zookeeper"
+#      - "storm-nimbus:nimbus"
+#      - "rabbit:rabbit"
+#      - "rabbit_dashboard:rabbit_dashboard"
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints: [node.role == worker]
+
+    visualizer:
+      image: dockersamples/visualizer:stable
+      ports:
+        - "8080:8080"
+      volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"
+      deploy:
+        placement:
+          constraints: [node.role == manager]
+
+
+    storm-ui:
+      image: storm:1.0.3
+      command: bash -c "storm ui"
+      networks:
+        - cini
+        ports:
+          - "8080:8080" #storm UI
+      depends_on: storm-nimbus
+#      links:
+#        - "storm-nimbus:nimbus"
+      deploy:
+        placement:
+          constraints: [node.role == manager]
+
+
+
+networks:
+    cini:
