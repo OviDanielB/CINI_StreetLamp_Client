@@ -157,6 +157,14 @@ public class App
         StreetLamp streetLamp = new StreetLamp();
         streetLamp.setAddress(address);
 
+        // sometimes generate lamp in a specific cell park, other times lamp externally a cell park
+        int i = generateRandomInt();
+        if ( i % 2 == 0) {
+            streetLamp.setCellID(i);
+        } else {
+            streetLamp.setCellID(-1);
+        }
+
 
 
         if(arg.equals("anomaly")){

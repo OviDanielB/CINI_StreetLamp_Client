@@ -12,6 +12,7 @@ public class StreetLamp {
     private boolean on;
     private Lamp lampModel;
     private Address address;
+    private int cellID;
     private float lightIntensity;
     private float consumption;
     private LocalDateTime lifetime;
@@ -19,15 +20,24 @@ public class StreetLamp {
     public StreetLamp() {
     }
 
-    public StreetLamp(int ID, boolean on, Lamp lampModel, Address address,
+    public StreetLamp(int ID, boolean on, Lamp lampModel, Address address, int cellID,
                       float lightIntensity, float consumption, LocalDateTime lifetime) {
         this.ID = ID;
         this.on = on;
         this.lampModel = lampModel;
         this.address = address;
+        this.cellID = cellID;
         this.lightIntensity = lightIntensity;
         this.consumption = consumption;
         this.lifetime = lifetime;
+    }
+
+    public int getCellID() {
+        return cellID;
+    }
+
+    public void setCellID(int cellID) {
+        this.cellID = cellID;
     }
 
     public int getID() {
