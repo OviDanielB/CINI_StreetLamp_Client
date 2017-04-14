@@ -54,8 +54,6 @@ services:
       - cini
     depends_on:
       - zookeeper
-#    links:
-#      - "zookeeper:zookeeper"
     deploy:
       placement:
         constraints: [node.role == manager]
@@ -70,11 +68,6 @@ services:
       - storm-nimbus
       - rabbit
       - rabbit_dashboard
-#    links:
-#      - "zookeeper:zookeeper"
-#      - "storm-nimbus:nimbus"
-#      - "rabbit:rabbit"
-#      - "rabbit_dashboard:rabbit_dashboard"
     deploy:
       mode: replicated
       replicas: 2
@@ -100,8 +93,6 @@ services:
         ports:
           - "8080:8080" #storm UI
       depends_on: storm-nimbus
-#      links:
-#        - "storm-nimbus:nimbus"
       deploy:
         placement:
           constraints: [node.role == manager]
