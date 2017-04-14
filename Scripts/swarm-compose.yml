@@ -1,6 +1,7 @@
 # rabbit queue
 version: "3"
 services:
+
   rabbit:
     image: rabbitmq:alpine
     hostname: rabbit1
@@ -74,29 +75,28 @@ services:
       placement:
         constraints: [node.role == worker]
 
-    visualizer:
-      image: dockersamples/visualizer:stable
-      ports:
-        - "8080:8080"
-      volumes:
-        - "/var/run/docker.sock:/var/run/docker.sock"
-      deploy:
-        placement:
-          constraints: [node.role == manager]
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
-
-    storm-ui:
-      image: storm:1.0.3
-      command: bash -c "storm ui"
-      networks:
-        - cini
-        ports:
-          - "8080:8080" #storm UI
-      depends_on: storm-nimbus
-      deploy:
-        placement:
-          constraints: [node.role == manager]
-
+  storm-ui:
+    image: storm:1.0.3
+    command: bash -c "storm ui"
+    networks:
+      - cini
+    ports:
+      - "8080:8080" #storm UI
+    depends_on:
+      - storm-nimbus
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
 
 networks:
