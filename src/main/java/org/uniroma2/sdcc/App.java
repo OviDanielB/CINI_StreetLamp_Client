@@ -186,7 +186,7 @@ public class App
                         //streetLamp.setNaturalLightLevel(generateRandomFloatGaussian());
                         message = gson.toJson(streetLamp);
 
-                        //channel.basicPublish("", "storm", null, message.getBytes());
+                        channel.basicPublish("", "storm", null, message.getBytes());
 
 
                         counter++;
@@ -243,8 +243,6 @@ public class App
         } else {
             streetLamp.setCellID(-1);
         }
-
-
 
 
         streetLamp.setID(generateRandomInt());
