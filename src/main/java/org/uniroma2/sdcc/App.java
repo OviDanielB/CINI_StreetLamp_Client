@@ -147,7 +147,7 @@ public class App
                                 channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, null, mocks[r].getBytes());
                         }
 
-                        Thread.sleep(1000);
+                        //Thread.sleep(1000);
 
                     }
 
@@ -159,18 +159,40 @@ public class App
                     StreetLampMessage streetLamp;
                     Gson gson = new Gson();
                     String message;
+
+                    streetLamp = generateRandomStreetLight();
+
+                    if(arg.equals("anomaly")){
+                        streetLamp.getStreetLamp().setID(Integer.valueOf(arg1));
+                        streetLamp.getStreetLamp().setLightIntensity(20);
+                    }
+
                     while (true) {
 
-                        streetLamp = generateRandomStreetLight();
+                        Float newValue = streetLamp.getStreetLamp().getLightIntensity() ;
+
+                        if(arg.equals("anomaly")){
+
+                        }else {
+                         newValue = streetLamp.getStreetLamp().getLightIntensity() + generateRandomIntNegPos();
+                            if(newValue > 100 )
+                            { newValue = newValue - 20;} else if(newValue < 40 ){newValue = newValue + 40;}
+                        }
+
+
+
+                        streetLamp.getStreetLamp().setLightIntensity(newValue);
+                        streetLamp.setTimestamp(System.currentTimeMillis());
+                        //streetLamp.setNaturalLightLevel(generateRandomFloatGaussian());
                         message = gson.toJson(streetLamp);
 
-                        channel.basicPublish("", "storm", null, message.getBytes());
+                        //channel.basicPublish("", "storm", null, message.getBytes());
 
 
                         counter++;
                         updateMean(streetLamp.getStreetLamp().getLightIntensity());
-                        System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
-                        //System.out.println(streetLamp.getNaturalLightLevel().getNaturalLightLevel());
+                        //System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
+                        System.out.println(message);
                         Thread.sleep(100);
                     }
                 }
@@ -194,6 +216,11 @@ public class App
 
     }
 
+    private static float generateRandomIntNegPos() {
+
+        return (float) (Math.random()*2 - 1);
+    }
+
     private static void updateMean(float lightIntensity) {
 
         mean = mean + (lightIntensity - mean) / counter;
@@ -201,7 +228,7 @@ public class App
 
     private static StreetLampMessage generateRandomStreetLight() {
         Address address = new Address();
-        address.setAddressType(AddressType.STREET);
+        //address.setAddressType(AddressType.STREET);
         address.setName(randomStreetName());
         address.setNumber(generateRandomInt());
         address.setNumberType(AddressNumberType.CIVIC);
@@ -219,17 +246,12 @@ public class App
 
 
 
-        if(arg.equals("anomaly")){
-            streetLamp.setID(12345);
-            streetLamp.setLightIntensity(90f);
 
-        }else {
-            streetLamp.setID(generateRandomInt());
-            streetLamp.setLightIntensity(generateRandomFloatGaussian());
-        }
-
+        streetLamp.setID(generateRandomInt());
+        streetLamp.setLightIntensity(generateRandomFloatGaussian());
 
         streetLamp.setLampModel(Lamp.LED);
+        streetLamp.setCellID(generateRandomInt());
         streetLamp.setOn(randomMalfunctioning());
         streetLamp.setConsumption(generateRandomFloat());
         streetLamp.setLifetime(LocalDateTime.now().minus(generateRandomInt() % 100, ChronoUnit.DAYS));
@@ -237,7 +259,7 @@ public class App
         StreetLampMessage message = new StreetLampMessage();
         message.setNaturalLightLevel(generateRandomFloat());
         message.setStreetLamp(streetLamp);
-        message.setTimestamp(System.currentTimeMillis() - (float)(Math.random() * 1000000));
+        message.setTimestamp(System.currentTimeMillis() - (long) (Math.random() * 1000000));
 
         return message;
     }
@@ -298,9 +320,9 @@ public class App
         float rand = (float) Math.random();
 
         if(rand < 0.5){
-            return "POLITECNICO";
+            return "VIA del POLITECNICO";
         } else {
-            return "CAMBRIDGE";
+            return "VIA CAMBRIDGE";
         }
     }
 

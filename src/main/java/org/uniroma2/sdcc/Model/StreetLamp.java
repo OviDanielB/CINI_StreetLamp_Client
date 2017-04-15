@@ -1,18 +1,14 @@
 package org.uniroma2.sdcc.Model;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
-/**
- * Created by ovidiudanielbarba on 16/03/2017.
- */
 public class StreetLamp {
 
     private int ID;
     private boolean on;
     private Lamp lampModel;
     private Address address;
-    private int cellID;
+    private int cellID; // -1 if lamp is not placed in a cell park
     private float lightIntensity;
     private float consumption;
     private LocalDateTime lifetime;
@@ -32,20 +28,20 @@ public class StreetLamp {
         this.lifetime = lifetime;
     }
 
-    public int getCellID() {
-        return cellID;
-    }
-
-    public void setCellID(int cellID) {
-        this.cellID = cellID;
-    }
-
     public int getID() {
         return ID;
     }
 
     public void setID(int ID) {
         this.ID = ID;
+    }
+
+    public int getCellID() {
+        return cellID;
+    }
+
+    public void setCellID(int cellID) {
+        this.cellID = cellID;
     }
 
     public boolean isOn() {
