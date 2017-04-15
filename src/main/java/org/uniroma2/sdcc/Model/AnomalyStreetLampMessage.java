@@ -35,4 +35,6 @@ public class AnomalyStreetLampMessage extends StreetLampMessage {
     public void setNoResponseCount(Long noResponseCount) {
         this.noResponseCount = noResponseCount;
     }
+
+
 }
