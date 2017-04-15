@@ -32,7 +32,7 @@ public class StormTopologiesTest {
     private static final Integer RABBIT_EXIT_PORT = 5673;
     private  static final String  EXIT_EXCHANGE_NAME = "dashboard_exchange";
     private static String EXIT_QUEUE_NAME ;
-    private static final String[] routingKeys = {"dashboard.anomaly", "dashboard.rank" , "dashboard.statistics.lamps","dashboard.statistics.streets",
+    private static final String[] routingKeys = {"dashboard.anomalies", "dashboard.rank" , "dashboard.statistics.lamps","dashboard.statistics.streets",
                                                     "dashboard.statistics.global"};
     /* topic based pub/sub */
     private  static final String EXIT_EXCHANGE_TYPE = "topic";
