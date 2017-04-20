@@ -65,7 +65,8 @@ public class App
         Thread producer = new Thread(() -> {
 
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("localhost");
+            factory.setHost("Helios-ELB-855796889.eu-west-1.elb.amazonaws.com");
+            factory.setPort(5672);
 
             if(arg.equals("node")){
                 factory.setPort(5673);
@@ -182,7 +183,7 @@ public class App
 
 
                         streetLamp.getStreetLamp().setLightIntensity(newValue);
-                        streetLamp.setTimestamp(System.currentTimeMillis());
+                        streetLamp.setTimestamp(System.currentTimeMillis() -  1000000);
                         //streetLamp.setNaturalLightLevel(generateRandomFloatGaussian());
                         message = gson.toJson(streetLamp);
 
@@ -192,8 +193,8 @@ public class App
                         counter++;
                         updateMean(streetLamp.getStreetLamp().getLightIntensity());
                         //System.out.print(" [CINI] Sent " + counter + " messages with mean = " + mean + "\r");
-                        System.out.println(message);
-                        Thread.sleep(100);
+                        //System.out.println(message);
+                        Thread.sleep(1);
                     }
                 }
 
