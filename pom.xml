@@ -36,7 +36,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>org.uniroma2.sdcc.App</mainClass>
+              <mainClass>org.uniroma2.sdcc.LampSimulator</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
             </manifest>
           </archive>
@@ -78,6 +78,12 @@
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
       <version>4.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>3.2.1</version>
     </dependency>
 
     <dependency>
