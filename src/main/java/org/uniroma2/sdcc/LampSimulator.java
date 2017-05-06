@@ -7,14 +7,18 @@ import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.sun.org.apache.bcel.internal.generic.LMUL;
 import org.uniroma2.sdcc.Model.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.IntStream;
 
 /**
  * Class that connects to RabbitMQ and sends simulated lamp messages
@@ -37,6 +41,8 @@ public class LampSimulator
     private static Random random;
     /* all messages light intensity mean (updated with every message sent) */
     private static float mean;
+    /* list of all addresses of the city */
+    private static List<String> addresses_list;
 
     /* used for calculating sent message rate*/
     private static MetricRegistry metrics = new MetricRegistry();
@@ -48,15 +54,19 @@ public class LampSimulator
         random = new Random(12345);
         mean = 0;
 
-        if(args.length == 0){
-            System.out.println("Usage: java -jar CINI_StreetLamp_Client-1.0.jar <rabbit host>");
-            System.exit(1);
-        }
-        rabbitHost = args[0];
+//        if(args.length == 0){
+//            System.out.println("Usage: java -jar CINI_StreetLamp_Client-1.0.jar <rabbit host>");
+//            System.exit(1);
+//        }
+//        rabbitHost = args[0];
 
-        startMetrics();
+        addresses_list = createRandomStreetList();
 
-        rabbitProducer();
+//        startMetrics();
+        for (int i=0; i< 100; i++)
+            System.out.println(new Gson().toJson(generateRandomStreetLight()));
+
+//        rabbitProducer();
     }
 
     /**
@@ -106,6 +116,8 @@ public class LampSimulator
                         /* trasform to json format */
                         message = gson.toJson(streetLamp);
 
+                        System.out.println(message);
+
                         /* send json message */
                         channel.basicPublish("", "storm", null, message.getBytes());
 
@@ -146,8 +158,8 @@ public class LampSimulator
 
         Address address = new Address();
         address.setName(randomStreetName());
-        address.setNumber(generateRandomInt());
-        address.setNumberType(AddressNumberType.CIVIC);
+        address.setNumber(randomStreetNumber());
+        address.setNumberType(randomStreetNumberType(address.getNumber()));
 
         StreetLamp streetLamp = new StreetLamp();
         streetLamp.setAddress(address);
@@ -163,7 +175,7 @@ public class LampSimulator
         streetLamp.setID(generateRandomInt());
         streetLamp.setLightIntensity(generateRandomFloatGaussian());
 
-        streetLamp.setLampModel(Lamp.LED);
+        streetLamp.setLampModel(generateRandomModel());
         streetLamp.setCellID(generateRandomInt());
         streetLamp.setOn(randomMalfunctioning());
         streetLamp.setConsumption(generateRandomFloat());
@@ -177,6 +189,51 @@ public class LampSimulator
         return message;
     }
 
+    /**
+     * Generate random Lamp Model among CFL, LED or UNKNOWN types.
+     * @return lamp model
+     */
+    private static Lamp generateRandomModel() {
+
+        Integer random_type = generateRandomInt() % 3;
+        switch (random_type) {
+            case 0:
+                return Lamp.CFL;
+            case 1:
+                return Lamp.LED;
+            default:
+                return Lamp.UNKNOWN;
+        }
+    }
+
+    /**
+     * Generate type of street number: CIVIC if number < 300, KM otherwise.
+     *
+     * @param number street number
+     * @return type of number
+     */
+    private static AddressNumberType randomStreetNumberType(Integer number) {
+
+        if (number < 300)
+            return AddressNumberType.CIVIC;
+        else
+            return AddressNumberType.KM;
+    }
+
+    /**
+     * Generate random street number between 1 and 25000.
+     *
+     * @return street number
+     */
+    private static int randomStreetNumber() {
+
+        Integer random_number = generateRandomInt() % 25001;
+
+        if (random_number == 0) random_number++;
+
+        return random_number;
+    }
+
 
     /**
      * Normal(GAUSSIAN_MEAN,GAUSSIAN_STDEV)
@@ -185,7 +242,7 @@ public class LampSimulator
      */
     private static float generateRandomFloatGaussian() {
 
-        return (float) random.nextGaussian() * GAUSSIAN_STDEV + GAUSSIAN_MEAN;
+        return (float) (Math.floor(random.nextGaussian() * GAUSSIAN_STDEV + GAUSSIAN_MEAN *100))/100;
 
     }
 
@@ -195,13 +252,9 @@ public class LampSimulator
      */
     private static String randomStreetName() {
 
-        float rand = (float) Math.random();
+        Integer random_address = generateRandomInt() % 100;
 
-        if(rand < 0.5){
-            return "VIA del POLITECNICO";
-        } else {
-            return "VIA CAMBRIDGE";
-        }
+        return addresses_list.get(random_address);
     }
 
     /**
@@ -223,7 +276,7 @@ public class LampSimulator
      */
     private static float generateRandomFloat() {
 
-        float rand =(float) (Math.random() * 100);
+        float rand =(float) (Math.floor(Math.random() * 10000))/100;
         return rand;
     }
 
@@ -235,5 +288,21 @@ public class LampSimulator
 
         int rand = (int) (Math.random() * 100000);
         return rand;
+    }
+
+    /**
+     * Generate list of 100 addresses named as
+     * "VIA STRADA1, VIA STRADA2, ..., VIA STRADA100"
+     * @return list
+     */
+    private static List<String> createRandomStreetList() {
+        List<String> list = new ArrayList<>();
+
+        IntStream.range(1,101).forEach(e->{
+            String street = "VIA STRADA" + String.valueOf(e);
+            list.add(street);
+        });
+
+        return list;
     }
 }
