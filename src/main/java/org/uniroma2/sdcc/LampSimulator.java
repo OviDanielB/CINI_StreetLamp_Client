@@ -54,19 +54,17 @@ public class LampSimulator
         random = new Random(12345);
         mean = 0;
 
-//        if(args.length == 0){
-//            System.out.println("Usage: java -jar CINI_StreetLamp_Client-1.0.jar <rabbit host>");
-//            System.exit(1);
-//        }
-//        rabbitHost = args[0];
+        if(args.length == 0){
+            System.out.println("Usage: java -jar CINI_StreetLamp_Client-1.0.jar <rabbit host>");
+            System.exit(1);
+        }
+        rabbitHost = args[0];
 
         addresses_list = createRandomStreetList();
 
-//        startMetrics();
-        for (int i=0; i< 100; i++)
-            System.out.println(new Gson().toJson(generateRandomStreetLight()));
+        startMetrics();
 
-//        rabbitProducer();
+        rabbitProducer();
     }
 
     /**
@@ -91,7 +89,7 @@ public class LampSimulator
 
         Thread producer = new Thread(() -> {
 
-            /* rabbit connetion */
+            /* rabbit connection */
             ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(rabbitHost);
             factory.setPort(5672);
@@ -115,8 +113,6 @@ public class LampSimulator
 
                         /* trasform to json format */
                         message = gson.toJson(streetLamp);
-
-                        System.out.println(message);
 
                         /* send json message */
                         channel.basicPublish("", "storm", null, message.getBytes());
@@ -298,7 +294,7 @@ public class LampSimulator
     private static List<String> createRandomStreetList() {
         List<String> list = new ArrayList<>();
 
-        IntStream.range(1,101).forEach(e->{
+        IntStream.range(1,101).forEach( e -> {
             String street = "VIA STRADA" + String.valueOf(e);
             list.add(street);
         });
